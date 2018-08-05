@@ -6,7 +6,15 @@ const { wallet, networkClient } = require('./connect')
 
 app.use(cors())
 app.use(express.static('dist'))
-app.use('/public', express.static('public'))
+
+app.get('/network/info', (req, res) => {
+    networkClient.getInfo().then((info) => {
+        res.json(info)
+    })
+    .catch(e => {
+        res.send(e).status(400)
+    })
+})
 
 app.get('/wallet/info', (req, res) => {
     wallet.getInfo().then((info) => {
@@ -22,6 +30,27 @@ app.get('/wallet/history', (req, res) => {
         res.json(info)
     })
     .catch(e => {
+        res.send(e).status(400)
+    })
+})
+
+app.post('/wallet/send', (req, res) => {
+    const query = req.query
+    console.log('query', query)
+
+    wallet.send({
+        outputs: [
+            {
+                value: query.value,
+                address: query.address
+            }
+        ]
+    }).then((info) => {
+        console.log('Info', info)
+        res.json(info)
+    })
+    .catch(e => {
+        console.log('e', e)
         res.send(e).status(400)
     })
 })
