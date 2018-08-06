@@ -3,6 +3,7 @@ import axios from 'axios';
 import { connect, dispatch } from 'react-redux'
 import { updateWalletHistory, updateWalletInfo, updateNetworkInfo } from '../redux/actions'
 import io from 'socket.io-client'
+import '../styles/Wallet.css'
 
 class Wallet extends Component {
     constructor(props) {
@@ -11,15 +12,16 @@ class Wallet extends Component {
         this.getWalletInfo = this.getWalletInfo.bind(this)
         this.getNetworkInfo = this.getNetworkInfo.bind(this)
         this.connectSocket = this.connectSocket.bind(this)
-        this.sendMoney = this.sendMoney.bind(this)
+        this.getDifficulty = this.getDifficulty.bind(this)
         this.onSubmit = this.onSubmit.bind(this)
+
+        this.state = {
+            sendValue: 0,
+            receiveAddress: '2N8hwP1WmJrFF5QWABn38y63uYLhnJYJYTF' //found at https://testnet.manu.backend.hamburg/faucet
+        }
     }
 
-    sendMoney() {
-
-    }
-
-    connectSocket() {
+    connectSocket(id, token) {
         const socket = io('x:hunter2@178.128.226.239:18332')
 
         socket.on('connect', (r) => {
@@ -28,26 +30,26 @@ class Wallet extends Component {
             socket.emit('auth', 'hunter2', (res) => {
                 console.log('Authorizing.. ')
     
-                socket.emit('wallet join', 'primary', '8e265457e62f7cce9260f14024f356ac0a7bb4f324443070bd2843e680f2f408', (r) => {
+                socket.emit('wallet join', id, token, (r) => {
                     console.log('Wallet joined.')
                 })
-            })  
-            
+            })
         }); 
 
         socket.on('wallet tx', res => {
             console.log('wallet tx', res)
+            this.getWalletHistory().then((history) => {
+                this.props.updateWalletHistory(history)
+            })
         })
-        
-        // socket.on('error', (err) => {
-        //     console.log('error', err)
-        // })
     }
 
-    componentWillMount() {
-        this.connectSocket()
-
+    componentDidMount() {
         this.getWalletInfo()
+        .then((wallet_info) => {
+            this.connectSocket(wallet_info.id, wallet_info.token)
+            return wallet_info
+        })
         .then((wallet_info) => {
             this.props.updateWalletInfo(wallet_info)
             return this.getNetworkInfo()
@@ -79,74 +81,134 @@ class Wallet extends Component {
         }).catch(e => console.log('error getWalletHistory', e))
     }
 
+    getDifficulty() {
+        return axios.get('http://localhost:3080/network/difficulty').then((res) => {
+            return res.data
+        }).catch(e => console.log('error getDifficulty', e))
+    }
+
+    getHashHistory() {
+        return (
+            <div>
+                {
+                    this.props.history.map((v, i) => {
+                        // Limit hash history to latest 5 hashes.
+                        if(i + 1 <= 5) {
+                            return (
+                                <div className='hash' key={v.hash}>
+                                    {v.hash}
+                                </div>
+                            )
+                        }
+                    })
+                }
+            </div>
+        )
+    }
+
     onSubmit(e) {        
-        // validateAddress
         e.preventDefault()
 
-        const sendAddress = '2N8hwP1WmJrFF5QWABn38y63uYLhnJYJYTF'
-        const value = 1
+        axios.get(`http://localhost:3080/network/validate_address?address=${this.state.receiveAddress}`)
+        .then((res) => {
+            if(!res.data.isvalid) {
+                throw new Error('Address is not valid.')
+            }
 
-        axios.post(`http://localhost:3080/wallet/send?value=${value}&address=${sendAddress}`).then((res) => {
+            return axios.post(`http://localhost:3080/wallet/send?value=${this.state.sendValue}&address=${this.state.receiveAddress}`)
+        })
+        .then((res) => {
             return res.data
-        }).catch(e => console.log('error getWalletHistory', e))
+        })
+        .catch(e => {
+            console.log('error onSubmit', e)
+        })
     }
 
   render() {
     return (
-        <div>
-            <div>
-                <h2>Wallet</h2>
-                {
-                    this.props.wallet? (
-<                       div>
-                            <div>Name: {this.props.wallet.account.name}</div>
-                            <div>Balance: {this.props.wallet.state.coin}</div>
-                            <div>Receive Address: {this.props.wallet.account.receiveAddress}</div>
-                        </div>
-                    ): (
-                        <div>
-                            Getting Wallet Info..
-                        </div>
-                    )
-                }
-            </div>
-            <div>
-                <h2>Network</h2>
-                <div>
-                    <div>Block Height</div>
-                    <div>Difficulty</div>
-                    <div>Network Type</div>
-                </div>
-            </div>
-
-            {/* <div>
-                <h2>History</h2>
-                <div>
-                    <div></div>
-                </div>
-            </div>
-
-            <div>
-                <h2>Accounts</h2>
-                <div>
-                    <div></div>
-                </div>
-            </div> */}
-
-            <div>
-                <h2>Send Funds</h2>
-                <form>
-                    <div>
-                        <input type="text" placeholder="Receive Address"/>
-                        <input type="number" placeholder="Number of Coins"/>
-                        <button onClick={this.onSubmit}>Send!</button>
+        <div className='walletContainer'>
+            <div className='row'>
+                <div className='col-sm-6'> 
+                    <div className='box'>
+                        <h5 className='title'>Network</h5>
+                        {
+                            this.props.network? (
+                                <div>
+                                    <div>Block Height: {this.props.network.chain.height}</div>
+                                    <div>Difficulty: {this.props.network.chain.height}</div>
+                                    <div>Network Type</div>
+                                </div>
+                            ): (
+                                <div>
+                                    Getting Network Info..
+                                </div>
+                            )
+                        }
                     </div>
-                </form>
-            </div>
 
-            <pre>
-                {JSON.stringify(this.props, null, 2)}
-            </pre>
+                    <div className='box'>
+                        <h5 className='title'>Wallet</h5>
+                        {
+                            this.props.wallet? (
+                                <div>
+                                    <div>Name: {this.props.wallet.account.name}</div>
+                                    <div>Balance: {this.props.wallet.state.coin}</div>
+                                    <div>Receive Address: {this.props.wallet.account.receiveAddress}</div>
+                                </div>
+                            ): (
+                                <div>
+                                    Getting Wallet Info..
+                                </div>
+                            )
+                        }
+                    </div>
+                </div>
+
+                <div className='col-sm-6'>
+                    <div className='box'>
+                        <h5 className='title'>Transactions</h5>
+                        
+                        <div>
+                            <h6>Send Funds</h6>
+                            <form>
+                                <div>
+                                    <div>
+                                        <div className='inputTitle'>Receive address</div>
+                                        <input type="text" value={this.state.receiveAddress} placeholder="Receive Address" onChange={e => this.setState({receiveAddress})}/>
+                                    </div>
+                                    <div>
+                                        <div className='inputTitle'>Number of coins</div>
+                                        <input type="number" placeholder="Number of Coins"/>
+                                    </div>
+                                    <button onClick={this.onSubmit}>Send!</button>
+                                </div>
+                            </form>
+                            <div >
+
+                            </div>
+                        </div>
+
+                        <div className='transactionHashHistory'>
+                            <h6>Transaction Hash History</h6>
+                            {
+                                this.props.history? (
+                                    <div>
+                                        {   
+                                            this.getHashHistory()
+                                        }
+                                    </div>
+                                ): (
+                                    <div>
+                                        Getting Transaction Hash History..
+                                    </div>
+                                )
+                            }
+                        </div>
+
+                    </div>
+                </div>
+            </div>
         </div>
     )
   }

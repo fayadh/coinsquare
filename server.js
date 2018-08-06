@@ -34,14 +34,36 @@ app.get('/wallet/history', (req, res) => {
     })
 })
 
+app.get('/network/validate_address', (req, res) => {
+    const query = req.query
+
+    networkClient.execute('validateaddress', [query.address]).then((result) => {
+        res.json(result)
+    })
+    .catch(e => {
+        res.send(e).status(400)
+    })
+})
+
+app.get('/network/difficulty', (req, res) => {
+    networkClient.execute('getinfo').then((info) => {
+        res.json(info.difficulty)
+    })
+    .catch(e => {
+        res.send(e).status(400)
+    })
+})
+
 app.post('/wallet/send', (req, res) => {
     const query = req.query
     console.log('query', query)
 
+    //TODO: add guards
+    
     wallet.send({
         outputs: [
             {
-                value: query.value,
+                value: parseInt(query.value),
                 address: query.address
             }
         ]
