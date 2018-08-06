@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
 import axios from 'axios';
 import { connect, dispatch } from 'react-redux'
-import { updateWalletHistory, updateWalletInfo, updateNetworkInfo } from '../redux/actions'
+import { updateWalletHistory, updateWalletInfo, updateNetworkInfo, updateDifficulty } from '../redux/actions'
 import io from 'socket.io-client'
+import _ from 'lodash'
 import '../styles/Wallet.css'
 
 class Wallet extends Component {
@@ -38,9 +39,15 @@ class Wallet extends Component {
 
         socket.on('wallet tx', res => {
             console.log('wallet tx', res)
-            this.getWalletHistory().then((history) => {
+            this.getWalletHistory()
+            .then((history) => {
                 this.props.updateWalletHistory(history)
+                return this.getWalletInfo()
             })
+            .then((wallet_info) => {
+                this.props.updateWalletInfo(wallet_info)
+            })
+            .catch(e => console.log('Error updating wallet.', e))
         })
     }
 
@@ -60,6 +67,10 @@ class Wallet extends Component {
         })
         .then((history) => {
             this.props.updateWalletHistory(history)
+            return this.getDifficulty()
+        })
+        .then((difficulty) => {
+            this.props.updateDifficulty(difficulty) 
         })
     }
 
@@ -87,11 +98,11 @@ class Wallet extends Component {
         }).catch(e => console.log('error getDifficulty', e))
     }
 
-    getHashHistory() {
+    getLatestHashHistory() {
         return (
             <div>
                 {
-                    this.props.history.map((v, i) => {
+                    _.reverse(this.props.history).map((v, i) => {
                         // Limit hash history to latest 5 hashes.
                         if(i + 1 <= 5) {
                             return (
@@ -135,9 +146,9 @@ class Wallet extends Component {
                         {
                             this.props.network? (
                                 <div>
+                                    <div>Type: {this.props.network.network}</div>
                                     <div>Block Height: {this.props.network.chain.height}</div>
-                                    <div>Difficulty: {this.props.network.chain.height}</div>
-                                    <div>Network Type</div>
+                                    <div>Difficulty: {this.props.difficulty}</div>
                                 </div>
                             ): (
                                 <div>
@@ -195,7 +206,7 @@ class Wallet extends Component {
                                 this.props.history? (
                                     <div>
                                         {   
-                                            this.getHashHistory()
+                                            this.getLatestHashHistory()
                                         }
                                     </div>
                                 ): (
@@ -209,6 +220,10 @@ class Wallet extends Component {
                     </div>
                 </div>
             </div>
+
+            <pre>
+                {JSON.stringify(this.props, null, 2)}
+            </pre>
         </div>
     )
   }
@@ -218,7 +233,8 @@ const mapDispatchToProps = dispatch => {
     return {
         updateWalletHistory: history => dispatch(updateWalletHistory(history)),
         updateWalletInfo: info => dispatch(updateWalletInfo(info)),
-        updateNetworkInfo: info => dispatch(updateNetworkInfo(info))
+        updateNetworkInfo: info => dispatch(updateNetworkInfo(info)),
+        updateDifficulty: difficulty => dispatch(updateDifficulty(difficulty))
     }
 }
 
@@ -226,7 +242,8 @@ const mapStateToProps = state => {
     return {
         history: state.history,
         wallet: state.wallet,
-        network: state.network
+        network: state.network,
+        difficulty: state.difficulty
     }
 }
 
