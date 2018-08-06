@@ -18,7 +18,11 @@ class Wallet extends Component {
 
         this.state = {
             sendValue: 0,
-            receiveAddress: '2N8hwP1WmJrFF5QWABn38y63uYLhnJYJYTF' //found at https://testnet.manu.backend.hamburg/faucet
+            receiveAddress: '2N8hwP1WmJrFF5QWABn38y63uYLhnJYJYTF', //found at https://testnet.manu.backend.hamburg/faucet
+            error: {
+                isError: false,
+                errorMessage: null
+            }
         }
     }
 
@@ -99,15 +103,18 @@ class Wallet extends Component {
     }
 
     getLatestHashHistory() {
+        console.log('history', this.props.history)
         return (
             <div>
                 {
-                    _.reverse(this.props.history).map((v, i) => {
+                    this.props.history.map((v, i) => {
                         // Limit hash history to latest 5 hashes.
                         if(i + 1 <= 5) {
+                            const item = this.props.history[this.props.history.length - i - 1] 
                             return (
                                 <div className='hash' key={v.hash}>
-                                    {v.hash}
+                                    <div>{item.hash}</div>
+                                    <div className='transactionDate'>{item.date}</div>
                                 </div>
                             )
                         }
@@ -120,6 +127,26 @@ class Wallet extends Component {
     onSubmit(e) {        
         e.preventDefault()
 
+        //remove all error messages
+        this.setState({
+            error: {
+                isError: false,
+                errorMessage: null
+            }
+        })
+
+        //Verify that the user has enough funds in their account make the transaction.
+        const currentBalance = this.props.wallet.state.coin
+        if(this.state.sendValue > currentBalance) {
+            this.setState({
+                error: {
+                    isError: true,
+                    errorMessage: `You do not have enough funds in your account to make this transaction. You only have a balance of ${currentBalance}.`
+                }
+            })
+        }
+
+        //Verify address
         axios.get(`http://localhost:3080/network/validate_address?address=${this.state.receiveAddress}`)
         .then((res) => {
             if(!res.data.isvalid) {
@@ -127,9 +154,6 @@ class Wallet extends Component {
             }
 
             return axios.post(`http://localhost:3080/wallet/send?value=${this.state.sendValue}&address=${this.state.receiveAddress}`)
-        })
-        .then((res) => {
-            return res.data
         })
         .catch(e => {
             console.log('error onSubmit', e)
@@ -179,29 +203,9 @@ class Wallet extends Component {
                 <div className='col-sm-6'>
                     <div className='box'>
                         <h5 className='title'>Transactions</h5>
-                        
-                        <div>
-                            <h6>Send Funds</h6>
-                            <form>
-                                <div>
-                                    <div>
-                                        <div className='inputTitle'>Receive address</div>
-                                        <input type="text" value={this.state.receiveAddress} placeholder="Receive Address" onChange={e => this.setState({receiveAddress})}/>
-                                    </div>
-                                    <div>
-                                        <div className='inputTitle'>Number of coins</div>
-                                        <input type="number" placeholder="Number of Coins"/>
-                                    </div>
-                                    <button onClick={this.onSubmit}>Send!</button>
-                                </div>
-                            </form>
-                            <div >
 
-                            </div>
-                        </div>
-
-                        <div className='transactionHashHistory'>
-                            <h6>Transaction Hash History</h6>
+                        <div className='transactionHashHistory py-4'>
+                            <div className='subtitle'>Transaction Hash History</div>
                             {
                                 this.props.history? (
                                     <div>
@@ -216,14 +220,32 @@ class Wallet extends Component {
                                 )
                             }
                         </div>
+                        
+                        <div className='my-2'>
+                            <div className='subtitle'>Send Funds</div>
+
+                            <form className='py-2'>
+                                <div>
+                                    <div>
+                                        <div className='inputTitle'>Receive address</div>
+                                        <input type="text" value={this.state.receiveAddress} placeholder="Receive Address" onChange={e => this.setState({receiveAddress})}/>
+                                    </div>
+                                    <div>
+                                        <div className='inputTitle'>Number of coins</div>
+                                        <input type="number" placeholder="Number of Coins"/>
+                                    </div>
+                                    <button onClick={this.onSubmit}>Send</button>
+                                </div>
+                            </form>
+                        </div>
 
                     </div>
                 </div>
             </div>
 
-            {/* <pre>
+            <pre>
                 {JSON.stringify(this.props, null, 2)}
-            </pre> */}
+            </pre>
         </div>
     )
   }
