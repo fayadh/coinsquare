@@ -221,9 +221,9 @@ class Wallet extends Component {
                 </div>
             </div>
 
-            <pre>
+            {/* <pre>
                 {JSON.stringify(this.props, null, 2)}
-            </pre>
+            </pre> */}
         </div>
     )
   }
