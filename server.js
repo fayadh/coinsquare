@@ -16,24 +16,6 @@ app.get('/network/info', (req, res) => {
     })
 })
 
-app.get('/wallet/info', (req, res) => {
-    wallet.getInfo().then((info) => {
-        res.json(info)
-    })
-    .catch(e => {
-        res.send(e).status(400)
-    })
-})
-
-app.get('/wallet/history', (req, res) => {
-    wallet.getHistory().then((info) => {
-        res.json(info)
-    })
-    .catch(e => {
-        res.send(e).status(400)
-    })
-})
-
 app.get('/network/validate_address', (req, res) => {
     const query = req.query
 
@@ -54,26 +36,64 @@ app.get('/network/difficulty', (req, res) => {
     })
 })
 
+app.get('/wallet/info', (req, res) => {
+    wallet.getInfo().then((info) => {
+        res.json(info)
+    })
+    .catch(e => {
+        res.send(e).status(400)
+    })
+})
+
+app.get('/wallet/pending', (req, res) => {
+    wallet.getPending().then((info) => {
+        res.json(info)
+    })
+    .catch(e => {
+        res.send(e).status(400)
+    })
+})
+
+app.get('/wallet/balance', (req, res) => {
+    wallet.getBalance().then((info) => {
+        console.log('info')
+        res.json(info)
+    })
+    .catch(e => {
+        res.send(e).status(400)
+    })
+})
+
+app.get('/wallet/history', (req, res) => {
+    wallet.getHistory().then((info) => {
+        res.json(info)
+    })
+    .catch(e => {
+        res.send(e).status(400)
+    })
+})
+
 app.post('/wallet/send', (req, res) => {
     const query = req.query
-    console.log('query', query)
-
     //TODO: add guards
     
     wallet.send({
         outputs: [
             {
-                value: parseInt(query.value),
-                address: query.address
+                value: 1000,
+                address: '2N8hwP1WmJrFF5QWABn38y63uYLhnJYJYTF'
             }
         ]
     }).then((info) => {
         console.log('Info', info)
-        res.json(info)
+        res.json({
+            msg: 'here i am',
+            data: info
+        })
     })
     .catch(e => {
         console.log('e', e)
-        res.send(e).status(400)
+        res.json(e)
     })
 })
 

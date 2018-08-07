@@ -10,10 +10,10 @@ class Wallet extends Component {
     constructor(props) {
         super(props)
 
+        this.connectSocket = this.connectSocket.bind(this)
         this.getWalletInfo = this.getWalletInfo.bind(this)
         this.getNetworkInfo = this.getNetworkInfo.bind(this)
-        this.connectSocket = this.connectSocket.bind(this)
-        this.getDifficulty = this.getDifficulty.bind(this)
+        this.getNetworkDifficulty = this.getNetworkDifficulty.bind(this)
         this.onSubmit = this.onSubmit.bind(this)
 
         this.state = {
@@ -39,11 +39,11 @@ class Wallet extends Component {
                     console.log('Wallet joined.')
                 })
             })
-        }); 
+        });
 
-        socket.on('wallet tx', res => {
-            console.log('wallet tx', res)
-            this.getWalletHistory()
+        const updateWallet = () => {
+            console.log('Updating wallet..')
+            return this.getWalletHistory()
             .then((history) => {
                 this.props.updateWalletHistory(history)
                 return this.getWalletInfo()
@@ -52,6 +52,16 @@ class Wallet extends Component {
                 this.props.updateWalletInfo(wallet_info)
             })
             .catch(e => console.log('Error updating wallet.', e))
+        }
+
+        socket.on('wallet tx', res => {
+            console.log('wallet tx', res)
+            updateWallet()
+        })
+
+        socket.on('wallet balance', res => {
+            console.log('wallet balance', res)
+            updateWallet()
         })
     }
 
@@ -71,7 +81,7 @@ class Wallet extends Component {
         })
         .then((history) => {
             this.props.updateWalletHistory(history)
-            return this.getDifficulty()
+            return this.getNetworkDifficulty()
         })
         .then((difficulty) => {
             this.props.updateDifficulty(difficulty) 
@@ -96,10 +106,10 @@ class Wallet extends Component {
         }).catch(e => console.log('error getWalletHistory', e))
     }
 
-    getDifficulty() {
+    getNetworkDifficulty() {
         return axios.get('http://localhost:3080/network/difficulty').then((res) => {
             return res.data
-        }).catch(e => console.log('error getDifficulty', e))
+        }).catch(e => console.log('error getNetworkDifficulty', e))
     }
 
     getLatestHashHistory() {
@@ -138,12 +148,15 @@ class Wallet extends Component {
         //Verify that the user has enough funds in their account make the transaction.
         const currentBalance = this.props.wallet.state.coin
         if(this.state.sendValue > currentBalance) {
+            const errorMessage = `You do not have enough funds in your account to make this transaction. You only have a balance of ${currentBalance}.`
             this.setState({
                 error: {
                     isError: true,
-                    errorMessage: `You do not have enough funds in your account to make this transaction. You only have a balance of ${currentBalance}.`
+                    errorMessage
                 }
             })
+            
+            console.log('error!', errorMessage)
         }
 
         //Verify address
@@ -169,11 +182,22 @@ class Wallet extends Component {
                         <h5 className='title'>Network</h5>
                         {
                             this.props.network? (
-                                <div>
-                                    <div>Type: {this.props.network.network}</div>
-                                    <div>Block Height: {this.props.network.chain.height}</div>
-                                    <div>Difficulty: {this.props.difficulty}</div>
-                                </div>
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td>Type</td>
+                                            <td>{this.props.network.network}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Block Height</td>
+                                            <td>{this.props.network.chain.height}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Difficulty</td>
+                                            <td>{this.props.difficulty}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             ): (
                                 <div>
                                     Getting Network Info..
@@ -187,10 +211,43 @@ class Wallet extends Component {
                         {
                             this.props.wallet? (
                                 <div>
-                                    <div>Name: {this.props.wallet.account.name}</div>
-                                    <div>Balance: {this.props.wallet.state.coin}</div>
-                                    <div>Receive Address: {this.props.wallet.account.receiveAddress}</div>
-                                </div>
+                                    <div className='subtitle mt-4 mb-2'>Details</div>
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <td>Name</td>
+                                                <td>{this.props.wallet.account.name}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Receive Address</td>
+                                                <td>{this.props.wallet.account.receiveAddress}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <div className='subtitle mt-4 mb-2'>Balance</div>
+
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <td>Coins</td>
+                                                <td>{this.props.wallet.state.coin}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Expected Future Value</td>
+                                                <td>{this.props.wallet.state.unconfirmed}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Confirmed</td>
+                                                <td>{this.props.wallet.state.confirmed}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Unconfirmed</td>
+                                                <td>{this.props.wallet.state.unconfirmed - this.props.wallet.state.confirmed}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div> 
                             ): (
                                 <div>
                                     Getting Wallet Info..
@@ -227,24 +284,23 @@ class Wallet extends Component {
                             <form className='py-2'>
                                 <div>
                                     <div>
-                                        <div className='inputTitle'>Receive address</div>
-                                        <input type="text" value={this.state.receiveAddress} placeholder="Receive Address" onChange={e => this.setState({receiveAddress})}/>
+                                        <label for='form-receive-address' className='inputTitle'>Receive address</label>
+                                        <input id='form-receive-address' type="text" value={this.state.receiveAddress} placeholder="Receive Address" onChange={e => this.setState({receiveAddress: e.target.value})}/>
                                     </div>
                                     <div>
-                                        <div className='inputTitle'>Number of coins</div>
-                                        <input type="number" placeholder="Number of Coins"/>
+                                        <label for='form-number-of-coins' className='inputTitle'>Number of coins</label>
+                                        <input id='form-number-of-coins' type="number" placeholder="Number of Coins" onChange={e => this.setState({sendValue: e.target.value})}/>
                                     </div>
                                     <button onClick={this.onSubmit}>Send</button>
                                 </div>
                             </form>
                         </div>
-
                     </div>
                 </div>
             </div>
 
             <pre>
-                {JSON.stringify(this.props, null, 2)}
+                {JSON.stringify(this.state, null, 2)}
             </pre>
         </div>
     )
