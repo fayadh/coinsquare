@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import axios from 'axios'
 import './TransactionForm.css'
+import config from '../../../../config.json';
 
 class TransactionForm extends Component {
     constructor(props) {
@@ -63,7 +64,7 @@ class TransactionForm extends Component {
         const toSatoshis = (btc) => btc * 100000000
 
         //Verify address
-        axios.get(`http://localhost:3080/network/validate_address?address=${this.state.receiveAddress}`)
+        axios.get(`http://localhost:${config.serverPort}/network/validate_address?address=${this.state.receiveAddress}`)
         .then((res) => {
             if(!res.data.isvalid) {
                 const message = 'This address is not valid.'
@@ -72,7 +73,7 @@ class TransactionForm extends Component {
             }
 
             //Transact
-            return axios.post(`http://localhost:3080/wallet/send?value=${toSatoshis(this.state.sendValue)}&address=${this.state.receiveAddress}`)
+            return axios.post(`http://localhost:${config.serverPort}/wallet/send?value=${toSatoshis(this.state.sendValue)}&address=${this.state.receiveAddress}`)
         })
         .then((transaction_info) => {
             //No need to reset state.

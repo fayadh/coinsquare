@@ -1,9 +1,8 @@
 const express = require('express')
 const app = express()
-const PORT = 3080
+const PORT = require('./config.json').serverPort
 const cors = require('cors')
 const { 
-    account,
     wallet, 
     walletID,
     walletClient, 
