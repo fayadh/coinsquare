@@ -15,6 +15,7 @@ To run the application: run the server, install the libraries, and start the app
 2. `yarn install`
 3. `yarn start`
 
+#NOTE: I'm running the applications using Node v8.
 
 The server will be listening on port 3080 by default. You can change the PORT variable in config.json to change the port in use.
 
@@ -22,3 +23,5 @@ I've included some testing via jest, to check that we can connect to the network
 To run the tests, simply type:
 
 `yarn test`
+
+Feel free to email me at fayadh.almosawi@gmail.com to let me know if you have any questions or concerns!

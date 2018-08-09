@@ -51,6 +51,15 @@ app.get('/wallet/history', (req, res) => {
     })
 })
 
+app.get('/wallet/history/full', (req, res) => {
+    wallet.getHistory().then((info) => {
+        res.json(info)
+    })
+    .catch(e => {
+        res.send(e).status(400)
+    })
+})
+
 app.post('/wallet/send', (req, res) => {
     const query = req.query
     const { address } = query
