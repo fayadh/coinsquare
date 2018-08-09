@@ -1,11 +1,11 @@
-Coinsquare Assignment
+### Coinsquare Assignment
 
 The project has one main Wallet component, which is made up of 4 other sub components:
 
-* NetworkInformation: lists requested network information.
-* WalletInformation: lists requested wallet information.
-* TransactionHistory: lists the hash history of the latest 5 transactions.
-* TransactionForm: sends BTC to a given address.
+* `NetworkInformation`: lists requested network information.
+* `WalletInformation`: lists requested wallet information.
+* `TransactionHistory`: lists the hash history of the latest 5 transactions.
+* `TransactionForm`: sends BTC to a given address.
 
 
 To run the application: run the server, install the libraries, and start the application.
