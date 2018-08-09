@@ -5,6 +5,13 @@ import {
   UPDATE_DIFFICULTY
 } from "../constants/action-types";
 
+import {
+  getNetworkInfo,
+  getWalletInfo,
+  getWalletHistory,
+  getNetworkDifficulty
+} from '../../helpers.js';
+
 const initialState = {
     wallet: null,
     history: null,

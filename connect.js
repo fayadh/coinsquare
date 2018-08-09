@@ -5,7 +5,8 @@ const network = Network.get('testnet');
 
 const config = require('./config.json')
 const PORT = 18332
-const id = 'primary'
+const walletID = 'primary'
+const account = 'default'
 
 const networkClientOptions = {
   network: network.type,
@@ -21,10 +22,12 @@ const walletOptions = {
 
 const networkClient = new NodeClient(networkClientOptions);
 const walletClient = new WalletClient(walletOptions);
-const wallet = walletClient.wallet(id);
+const wallet = walletClient.wallet(walletID);
 
 module.exports = {
     networkClient,
     walletClient,
-    wallet
+    walletID,
+    wallet,
+    account
 }

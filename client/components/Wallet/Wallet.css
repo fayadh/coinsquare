@@ -1,71 +1,7 @@
-button {
-    background: white;
-    border-radius: 4px;
-    color: black;
-    padding: 0.33em 1.5em;
-    margin: 0.4em 0;
-    font-size: 0.8em;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: steelblue;
-}
-
-.box {
-    padding: 0.6em;
-    margin: 0.6em;
-}
-
 .walletContainer {
     margin: 1em;
     border-radius: 2px;
     padding: 1em;
-    background: steelblue;
+    background: slateblue;
     color: white;
-}
-
-.title {
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 0.4em;
-    font-size: 0.8em;
-}
-
-.subtitle {
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 0.2em;
-    font-size: 0.6em;
-}
-
-input {
-    width: 100%;
-    margin: 0.25em 0;
-    border-radius: 2px;
-    padding: 2px;
-}
-
-.inputTitle {
-    font-size: 0.8em;
-}
-
-.transactionHashHistory {
-    word-wrap: break-word;
-}
-
-.transactionDate {
-    font-size: 0.6em;
-    color: silver;
-}
-
-.hash {
-    color: beige;
-    padding: 0.4em 0;
-}
-
-.break {
-    word-break: break-all;
-}
-
-td {
-    padding-right: 1em;
 }

@@ -1,0 +1,23 @@
+.transactionHashHistory {
+    word-wrap: break-word;
+}
+
+.transactionDate {
+    font-size: 0.6em;
+    color: silver;
+}
+
+.transactionCategory {
+    font-size: 1em;
+}
+
+.transactionAmount {
+    font-size: 1em;
+    color: silver;
+}
+
+.hash {
+    color: beige;
+    padding: 0.4em 0;
+    font-size: 0.6em;
+}

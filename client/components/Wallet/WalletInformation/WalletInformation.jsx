@@ -26,6 +26,10 @@ class WalletInformation extends Component {
                                         <td>Receive Address</td>
                                         <td>{this.props.wallet.account.receiveAddress}</td>
                                     </tr>
+                                    <tr>
+                                        <td>Change Address</td>
+                                        <td>{this.props.wallet.account.changeAddress}</td>
+                                    </tr>
                                 </tbody>
                             </table>
 
@@ -33,10 +37,6 @@ class WalletInformation extends Component {
 
                             <table>
                                 <tbody>
-                                    <tr>
-                                        <td>Coins</td>
-                                        <td>{this.props.wallet.state.coin}</td>
-                                    </tr>
                                     <tr>
                                         <td>Expected Future Value</td>
                                         <td>{this.props.wallet.state.unconfirmed}</td>

@@ -16,16 +16,16 @@ class NetworkInformation extends Component {
                         <table>
                             <tbody>
                                 <tr>
-                                    <td>Type</td>
-                                    <td>{this.props.network.network}</td>
+                                    <td>Testnet</td>
+                                    <td>{this.props.network.testnet.toString()}</td>
                                 </tr>
                                 <tr>
                                     <td>Block Height</td>
-                                    <td>{this.props.network.chain.height}</td>
+                                    <td>{this.props.network.blocks}</td>
                                 </tr>
                                 <tr>
                                     <td>Difficulty</td>
-                                    <td>{this.props.difficulty}</td>
+                                    <td>{this.props.network.difficulty}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -42,8 +42,7 @@ class NetworkInformation extends Component {
 
 const mapStateToProps = state => {
     return {
-        network: state.network,
-        difficulty: state.difficulty
+        network: state.network
     }
 }
 

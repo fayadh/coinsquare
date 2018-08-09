@@ -11,6 +11,10 @@
     "start": "webpack-dev-server",
     "test": "jest"
   },
+  "jest": {
+    "verbose": true,
+    "testURL": "http://localhost/"
+  },
   "author": "fayadh <fayadh.almosawi@gmail.com>",
   "license": "MIT",
   "dependencies": {
@@ -24,6 +28,7 @@
     "css-loader": "^1.0.0",
     "html-webpack-plugin": "^2.30.1",
     "lodash": "^4.17.4",
+    "moment": "^2.22.2",
     "path": "^0.12.7",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",

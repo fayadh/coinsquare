@@ -1,3 +1,49 @@
 body {
     font-family: 'Lato', sans-serif;
-} 
+}
+
+button {
+    background: white;
+    border-radius: 4px;
+    color: black;
+    padding: 0.33em 1.5em;
+    margin: 0.4em 0;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: steelblue;
+}
+
+td {
+    padding-right: 1em;
+}
+
+.box {
+    padding: 0.6em;
+    margin: 0.6em;
+}
+
+.error {
+    background: indianred;
+    color: darkred;
+    padding: 1em 2em;
+    border-radius: 4px;
+}
+
+.title {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 0.4em;
+    font-size: 0.8em;
+}
+
+.subtitle {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 0.2em;
+    font-size: 0.6em;
+}
+
+.break {
+    word-break: break-all;
+}

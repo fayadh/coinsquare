@@ -2,13 +2,19 @@ const express = require('express')
 const app = express()
 const PORT = 3080
 const cors = require('cors')
-const { wallet, networkClient } = require('./connect')
+const { 
+    account,
+    wallet, 
+    walletID,
+    walletClient, 
+    networkClient 
+} = require('./connect')
 
 app.use(cors())
 app.use(express.static('dist'))
 
 app.get('/network/info', (req, res) => {
-    networkClient.getInfo().then((info) => {
+    networkClient.execute('getinfo').then((info) => {
         res.json(info)
     })
     .catch(e => {
@@ -27,37 +33,10 @@ app.get('/network/validate_address', (req, res) => {
     })
 })
 
-app.get('/network/difficulty', (req, res) => {
-    networkClient.execute('getinfo').then((info) => {
-        res.json(info.difficulty)
-    })
-    .catch(e => {
-        res.send(e).status(400)
-    })
-})
-
 app.get('/wallet/info', (req, res) => {
-    wallet.getInfo().then((info) => {
-        res.json(info)
-    })
-    .catch(e => {
-        res.send(e).status(400)
-    })
-})
-
-app.get('/wallet/pending', (req, res) => {
-    wallet.getPending().then((info) => {
-        res.json(info)
-    })
-    .catch(e => {
-        res.send(e).status(400)
-    })
-})
-
-app.get('/wallet/balance', (req, res) => {
-    wallet.getBalance().then((info) => {
-        console.log('info')
-        res.json(info)
+    wallet.getInfo()
+    .then((walletInfo) => {
+        res.json(walletInfo)
     })
     .catch(e => {
         res.send(e).status(400)
@@ -65,7 +44,7 @@ app.get('/wallet/balance', (req, res) => {
 })
 
 app.get('/wallet/history', (req, res) => {
-    wallet.getHistory().then((info) => {
+    walletClient.execute('listtransactions', [walletID]).then((info) => {
         res.json(info)
     })
     .catch(e => {
@@ -75,25 +54,32 @@ app.get('/wallet/history', (req, res) => {
 
 app.post('/wallet/send', (req, res) => {
     const query = req.query
-    //TODO: add guards
-    
-    wallet.send({
-        outputs: [
-            {
-                value: 1000,
-                address: '2N8hwP1WmJrFF5QWABn38y63uYLhnJYJYTF'
-            }
-        ]
-    }).then((info) => {
-        console.log('Info', info)
-        res.json({
-            msg: 'here i am',
-            data: info
-        })
+    const { address } = query
+    const value = parseInt(query.value)
+
+    if(!address) {
+        res.status(400).send('Address must be included.')
+        return
+    }
+
+    if(value <= 0) {
+        res.status(400).send('Value must be greater than 0.')
+        return
+    }
+
+    networkClient.execute('validateaddress', [query.address])
+    .then((validation) => {
+        if(!validation.isvalid) {
+            throw new Error('Address is not valid.')
+        }
+
+        return walletClient.execute('sendtoaddress', [address, value])
+    })
+    .then((transaction_info) => {
+        res.json(transaction_info)
     })
     .catch(e => {
-        console.log('e', e)
-        res.json(e)
+        res.status(400).send(e)
     })
 })
 

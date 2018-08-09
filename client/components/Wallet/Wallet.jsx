@@ -1,11 +1,17 @@
 import React, { Component } from 'react'
-import axios from 'axios';
 import { connect, dispatch } from 'react-redux'
 import { updateWalletHistory, updateWalletInfo, updateNetworkInfo, updateDifficulty } from '../../redux/actions'
 import io from 'socket.io-client'
+import {
+    getNetworkInfo,
+    getWalletInfo,
+    getWalletHistory,
+    getNetworkDifficulty,
+} from '../../helpers'
 
 import './Wallet.css'
 
+// Components
 import NetworkInformation from './NetworkInformation/NetworkInformation.jsx'
 import WalletInformation from './WalletInformation/WalletInformation.jsx'
 import TransactionHistory from './TransactionHistory/TransactionHistory.jsx'
@@ -16,9 +22,10 @@ class Wallet extends Component {
         super(props)
 
         this.connectSocket = this.connectSocket.bind(this)
-        this.getWalletInfo = this.getWalletInfo.bind(this)
-        this.getNetworkInfo = this.getNetworkInfo.bind(this)
-        this.getNetworkDifficulty = this.getNetworkDifficulty.bind(this)
+        this.getWalletInfo = getWalletInfo
+        this.getWalletHistory = getWalletHistory
+        this.getNetworkInfo = getNetworkInfo
+        this.getNetworkDifficulty = getNetworkDifficulty
     }
 
     connectSocket(id, token) {
@@ -37,6 +44,8 @@ class Wallet extends Component {
         });
 
         const updateWallet = () => {
+            //Update transaction history, and wallet state information.
+
             console.log('Updating wallet..')
             return this.getWalletHistory()
             .then((history) => {
@@ -61,6 +70,8 @@ class Wallet extends Component {
     }
 
     componentDidMount() {
+        //Connect via socket, gather all necessary wallet and network data for the child components, and update state accordingly.
+
         this.getWalletInfo()
         .then((wallet_info) => {
             this.connectSocket(wallet_info.id, wallet_info.token)
@@ -76,36 +87,9 @@ class Wallet extends Component {
         })
         .then((history) => {
             this.props.updateWalletHistory(history)
-            return this.getNetworkDifficulty()
-        })
-        .then((difficulty) => {
-            this.props.updateDifficulty(difficulty) 
         })
     }
 
-    getNetworkInfo() {
-        return axios.get('http://localhost:3080/network/info').then((res) => {
-            return res.data
-        }).catch(e => console.log('error getNetworkInfo', e))
-    }
-
-    getWalletInfo() {
-        return axios.get('http://localhost:3080/wallet/info').then((res) => {
-            return res.data
-        }).catch(e => console.log('error getWalletInfo', e))
-    }
-
-    getWalletHistory() {
-        return axios.get('http://localhost:3080/wallet/history').then((res) => {
-            return res.data
-        }).catch(e => console.log('error getWalletHistory', e))
-    }
-
-    getNetworkDifficulty() {
-        return axios.get('http://localhost:3080/network/difficulty').then((res) => {
-            return res.data
-        }).catch(e => console.log('error getNetworkDifficulty', e))
-    }
 
 
   render() {
