@@ -11,8 +11,8 @@ The client app has one main Wallet component, which is made up of 4 other sub co
 
 To run the application: run the server, install the libraries, and start the application.
 
-1. `node server.js`
-2. `yarn install`
+1. `yarn install`
+2. `node server.js`
 3. `yarn start`
 
 #NOTE: I'm running the applications using Node v8.

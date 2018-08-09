@@ -93,8 +93,9 @@ app.post('/wallet/send', (req, res) => {
 
 app.listen(PORT, (err) => {
     if(err) {
-        console.log('Server not running, something went wrong.')
+        console.log(`Server not running, something went wrong.`)
+        console.log('Error: ', err)
     } else {
-        console.log('All is well. Server running.')
+        console.log(`All is well. Server running on port ${PORT}.`)
     }
 })
