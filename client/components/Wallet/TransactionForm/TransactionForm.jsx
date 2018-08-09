@@ -48,6 +48,11 @@ class TransactionForm extends Component {
         //Remove the previous error message, in case it exist.
         this.clearError()
 
+        if(!this.state.receiveAddress) {
+            this.setError(`You can't have an empty receive address.`)
+            return
+        }
+
         //Verify that the user has enough funds in their account make the transaction.
         const currentBalance = this.props.wallet.state.unconfirmed
         if(this.state.sendValue > currentBalance) {
@@ -106,7 +111,7 @@ class TransactionForm extends Component {
                         </div>
                         <div>
                             <label htmlFor='form-number-of-coins' className='inputTitle'>Number of BTC</label>
-                            <input id='form-number-of-coins' type="number" placeholder="Number of Coins" value={this.state.value} onChange={e => this.setState({ sendValue: e.target.value })} />
+                            <input id='form-number-of-coins' type="number" placeholder="Number of BTC" value={this.state.value} onChange={e => this.setState({ sendValue: e.target.value })} />
                         </div>
                         <button onClick={this.onSubmit}>Send</button>
                     </div>
